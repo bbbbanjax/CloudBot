@@ -133,7 +133,8 @@ def lastfm(text, nick, db, bot, notice):
 def getartisttags(artist, bot):
     tag_list = []
     api_key = bot.config.get("api_keys", {}).get("lastfm")
-    params = { 'method': 'artist.getTopTags', 'api_key': api_key, 'artist': artist }
+    params = { 'method': 'artist.getTopTags', 'api_key': api_key, 'artist': artist,
+            'autocorrect': '1'}
     request = requests.get(api_url, params = params)
     tags = request.json()
 
@@ -152,7 +153,7 @@ def getsimilarartists(artist, bot):
     artist_list = []
     api_key = bot.config.get('api_keys', {}).get('lastfm')
     params = { 'method': 'artist.getsimilar', 'api_key': api_key,
-            'artist': artist }
+            'artist': artist, 'autocorrect': '1' }
     request = requests.get(api_url, params = params)
     similar = request.json()
 
