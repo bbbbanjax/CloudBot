@@ -393,10 +393,8 @@ def topartists(text, nick, db, bot, notice):
         return "Error: {}.".format(data["message"])
 
     if len(data["topartists"]["artist"]) < 10:
-        print('Less than 10')
         range_count = len(data["topartists"]["artist"])
     else:
-        print('More than 10')
         range_count = 10
 
     out = "{}'s favorite artists: ".format(username)
@@ -404,5 +402,4 @@ def topartists(text, nick, db, bot, notice):
         artist_name = data["topartists"]["artist"][r]["name"]
         play_count = data["topartists"]["artist"][r]["playcount"]
         out = out + "{} [{}] ".format(artist_name, play_count)
-    del range_count
     return out
