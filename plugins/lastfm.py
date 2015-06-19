@@ -362,8 +362,24 @@ def topartists(text, nick, db, bot, notice):
     return out
 
 @hook.command("ltw", "topweek", autohelp=False)
-def topartists(text, nick, db, bot, notice):
+def topweek(text, nick, db, bot, notice):
     """Grabs a list of the top artists in the last week for a last.fm username. You can set your lastfm username with .l username"""
+    topweek = topartists(text, nick, db, bot, notice, '7day')
+    return topweek
+
+@hook.command("ltm", "topmonth", autohelp=False)
+def topmonth(text, nick, db, bot, notice):
+    """Grabs a list of the top artists in the last month for a last.fm username. You can set your lastfm username with .l username"""
+    topmonth = topartists(text, nick, db, bot, notice, '1month')
+    return topmonth
+
+@hook.command("lty", "topyear", autohelp=False)
+def topyear(text, nick, db, bot, notice):
+    """Grabs a list of the top artists in the last year for a last.fm username. You can set your lastfm username with .l username"""
+    topyear = topartists(text, nick, db, bot, notice, '1year')
+    return topyear
+
+def topartists(text, nick, db, bot, notice, period):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
     if not api_key:
         return "error: no api key set"
@@ -380,7 +396,7 @@ def topartists(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'period': '7day',
+        'period': period,
         'limit': 10
     }
     request = requests.get(api_url, params=params)
