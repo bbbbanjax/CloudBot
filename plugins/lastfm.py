@@ -373,11 +373,17 @@ def topmonth(text, nick, db, bot, notice):
     topmonth = topartists(text, nick, db, bot, notice, '1month')
     return topmonth
 
-@hook.command("lty", "topyear", autohelp=False)
+@hook.command("lta", "topall", autohelp=False)
 def topyear(text, nick, db, bot, notice):
-    """Grabs a list of the top artists in the last year for a last.fm username. You can set your lastfm username with .l username"""
-    topyear = topartists(text, nick, db, bot, notice, '1year')
-    return topyear
+    """Grabs a list of the top artists all time for a last.fm username. You can set your lastfm username with .l username"""
+    topall = topartists(text, nick, db, bot, notice, '1year')
+    return topall
+
+@hook.command("ltf", "topfortnight", autohelp=False)
+def topyear(text, nick, db, bot, notice):
+    """Grabs a list of the top artists in the last fortnight for a last.fm username. You can set your lastfm username with .l username"""
+    topfortnight = topartists(text, nick, db, bot, notice, '14day')
+    return topfortnight
 
 def topartists(text, nick, db, bot, notice, period):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
