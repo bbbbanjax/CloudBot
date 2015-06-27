@@ -374,13 +374,13 @@ def topmonth(text, nick, db, bot, notice):
     return topmonth
 
 @hook.command("lta", "topall", autohelp=False)
-def topyear(text, nick, db, bot, notice):
+def topall(text, nick, db, bot, notice):
     """Grabs a list of the top artists all time for a last.fm username. You can set your lastfm username with .l username"""
     topall = topartists(text, nick, db, bot, notice, '1year')
     return topall
 
 @hook.command("ltf", "topfortnight", autohelp=False)
-def topyear(text, nick, db, bot, notice):
+def topfortnight(text, nick, db, bot, notice):
     """Grabs a list of the top artists in the last fortnight for a last.fm username. You can set your lastfm username with .l username"""
     topfortnight = topartists(text, nick, db, bot, notice, '14day')
     return topfortnight
