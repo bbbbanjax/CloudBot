@@ -6,6 +6,7 @@ import time
 import cloudbot
 from cloudbot import hook
 from cloudbot.event import EventType
+import pprint
 
 
 # +---------+
@@ -93,9 +94,14 @@ def format_irc_event(event, args):
         return irc_formats[event.irc_command].format(**args)
 
     # Try formatting with the CTCP command
-
     if event.irc_ctcp_text is not None:
-        ctcp_command, ctcp_message = event.irc_ctcp_text.split(None, 1)
+        ctcp_command = ''
+        ctcp_message = ''
+        if len(event.irc_ctcp_text.split(None, 1)) > 1:
+            ctcp_command, ctcp_message = event.irc_ctcp_text.split(None, 1)
+        else:
+            ctcp_command = event.irc_ctcp_text
+
         args["ctcp_command"] = ctcp_command
         args["ctcp_message"] = ctcp_message
 
