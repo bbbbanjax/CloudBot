@@ -1,23 +1,24 @@
-from util import hook, http, timesince
+from bs4 import BeautifulSoup
+from cloudbot import hook
 from datetime import datetime
-from BeautifulSoup import BeautifulSoup
-import re
+import requests
 
 baseurl = "http://www.metal-archives.com/"
 api_url = "http://ws.audioscrobbler.com/2.0/?format=json"
 
 @hook.command('maband', autohelp=False)
 @hook.command(autohelp=False)
-def maband(inp, conn=None, bot=None,nick=None, chan=None):
+def maband(text, conn=None, bot=None,nick=None, chan=None):
     """maband [band] -- Displays band info
      from metal archives."""
 
-    if not inp:
+    if not text:
         return "You must specify a band"
 
-    response = http.get_json(baseurl + "search/ajax-advanced/searching/bands",
-                             bandName=inp, exactBandMatch=0, sEcho=1, iColumns=3,
-                             sColumns='', iDisplayStart=0, iDisplayLength=200, sNames=',,')
+    params = {'bandName': text, 'exactBandMatch': 0, 'sEcho': 1, 'iColumns': 3, 'sColumns': '', 'iDisplayStart': 0, 'iDisplayLength': 200, 'sNames': ',,'}
+        
+    request = requests.get(baseurl + "search/ajax-advanced/searching/bands", params)
+    response = request.json()
 
     if response["error"] != "":
         return "Error: {}.".format(response["error"])
@@ -41,9 +42,9 @@ def maband(inp, conn=None, bot=None,nick=None, chan=None):
         bandGenre = band[1]
         bandCountry = band[2]
 
-        conn.send(u"PRIVMSG {} :\x02{}\x0f - {} from {} (More info: {})".format(chan, bandName, bandGenre, bandCountr$
+        conn.send(u"PRIVMSG {} :\x02{}\x0f - {} from {} (More info: {})".format(chan, bandName, bandGenre, bandCountry, bandLink))
 
-    return u"{} bands containing the name {}".format(len(bands), inp)
+    return u"{} bands containing the name {}".format(len(bands), text)
 
 @hook.command('mareviews', autohelp=False)
 @hook.command(autohelp=False)
@@ -100,9 +101,9 @@ def mareviews(inp, conn=None, bot=None,nick=None, chan=None):
 
             average = reduce(lambda x, y: x + y, percentages) / len(percentages)
 
-            return u'\x02{}\x0f has an average review of \x02{}\x0f% based on their album reviews. Use "," to separat$
+            return u'\x02{}\x0f has an average review of \x02{}\x0f% based on their album reviews. Use "," to separate artist, album.'.format(band)
         else:
-            return u'Could not calculate average review for {} or too many bands with the same name. Use "," to seper$
+            return u'Could not calculate average review for {} or too many bands with the same name. Use "," to seperate artist, album.'.format(band)
     else:
         if type(reviews["aaData"]) == list  and len(reviews["aaData"]) > 0:
             fullAlbum = ""
@@ -118,7 +119,7 @@ def mareviews(inp, conn=None, bot=None,nick=None, chan=None):
                 if len(percentages) > 0:
                     average = reduce(lambda x, y: x + y, percentages) / len(percentages)
 
-                    return u'The album \x02{}\x0f by \x02{}\x0f has an average review of \x02{}\x0f%'.format(fullAlbu$
+                    return u'The album \x02{}\x0f by \x02{}\x0f has an average review of \x02{}\x0f%'.format(fullAlbum, band, average)
                 else:
                     return u'Could not find the album {} for the band {}'.format(album, band)
             else:
