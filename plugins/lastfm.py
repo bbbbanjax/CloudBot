@@ -8,6 +8,8 @@ from sqlalchemy import Table, Column, PrimaryKeyConstraint, String
 from cloudbot import hook
 from cloudbot.util import timeformat, web, botvars
 
+import pprint
+
 api_url = "http://ws.audioscrobbler.com/2.0/?format=json"
 
 table = Table(
@@ -425,3 +427,26 @@ def topartists(text, nick, db, bot, notice, period):
         play_count = data["topartists"]["artist"][r]["playcount"]
         out = out + "{} [{}] ".format(artist_name, play_count)
     return out
+
+@hook.command(autohelp=False)
+def geogigs(text, conn=None, bot=None,nick=None, chan=None):
+    maxgigs=5
+    style='metal'
+    notStyles = ['metalcore', 'nu metal', 'frenchcore']
+    gigCounter = 0
+    api_key = bot.config.get("api_keys", {}).get("lastfm")
+    if not api_key:
+        return "error: no api key set"
+    
+    params = {"method": "geo.getEvents", "api_key": api_key, "location": text, "tag": style, "limit": 20}
+    request = requests.get(api_url, params)
+    response = request.json()
+    
+    if "error" in response:
+        return "Error: {}.".format(response["message"])
+    
+    if type(response) == dict and "event" in response["events"] and type(reponse["events"]["event"]) == list:
+        conn.send("PRIVMSG {}:\x01ACTION will headbang at these gigs with{}:\x01".format(chan, nick))
+        
+    else:
+        conn.send(u"PRIVMSG {}: {}, No gigs for {} :(".format(chan, nick, inp))
