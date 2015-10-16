@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 from cloudbot import hook
 from datetime import datetime
 import requests
+import re
+import pprint
+from functools import reduce
 
 baseurl = "http://www.metal-archives.com/"
 api_url = "http://ws.audioscrobbler.com/2.0/?format=json"
@@ -47,34 +50,35 @@ def maband(text, conn=None, bot=None,nick=None, chan=None):
     return u"{} bands containing the name {}".format(len(bands), text)
 
 @hook.command('mareviews', autohelp=False)
-@hook.command(autohelp=False)
-def mareviews(inp, conn=None, bot=None,nick=None, chan=None):
+def mareviews(text, conn=None, bot=None,nick=None, chan=None):
     """marating [band] -- Displays band rating
      from metal archives."""
 
-    if not inp:
+    if not text:
         return "You must specify a band"
 
-    comms = inp.split(",")
+    comms = text.split(",")
 
     album = None
     if(len(comms) == 1):
-        inp = comms[0].strip()
+        text = comms[0].strip()
     else:
-        inp = comms[0].strip()
+        text = comms[0].strip()
         album = comms[1]
 
     album = str(album).strip()
+    
+    params = {"bandName": text, "exactBandMatch": 0, "sEcho": 1, "iColumns": 3, "sColumns": '', "iDisplayStart": 0, "iDisplayLength": 200, "sNames": ",,"}
+    
+    request = requests.get(baseurl + "search/ajax-advanced/searching/bands", params)
 
-    response = http.get_json(baseurl + "search/ajax-advanced/searching/bands",
-                             bandName=inp, exactBandMatch=0, sEcho=1, iColumns=3,
-                             sColumns='', iDisplayStart=0, iDisplayLength=200, sNames=',,')
+    response = request.json()
 
     if response["error"] != "":
         return "Error: {}.".format(response["error"])
 
     if response["iTotalRecords"] == 0:
-        return u"No bands were found named {}".format(inp)
+        return u"No bands were found named {}".format(text)
 
     bands = response["aaData"]
 
@@ -86,13 +90,13 @@ def mareviews(inp, conn=None, bot=None,nick=None, chan=None):
 
     regex2 = re.compile("(?<={}/).*".format(rawBand.replace("/", "")))
     bandId = regex2.findall(href)[0]
+    
+    params = {"sEcho": 1, "iColumns": 4, "sColumns": "", "iDisplayStart": 0, "iDisplayLength": 200, "mDataProp_0": 0, "mDataProp_1": 1, "mDataProp_2": 2, "mDataProp_3": 3,
+    "iSortingCols": 1, "iSortCol_0": 3, "sSortDir_0": "desc", "bSortable_0": "true", "bSortable_1": "true", "bSortable_2": "true", "bSortable_3": "true"}
+    request = requests.get(baseurl + "review/ajax-list-band/id/{}/json/1".format(bandId), params)
 
-    reviews = http.get_json(baseurl + "review/ajax-list-band/id/{}/json/1".format(bandId),
-                             sEcho=1, iColumns=4, sColums='', iDisplayStart=0, iDisplayLength=200,
-                             mDataProp_0=0, mDataProp_1=1, mDataProp_2=2, mDataProp_3=3, iSortingCols=1, iSortCol_0=3,
-                             sSortDir_0="desc", bSortable_0="true", bSortable_1="true", bSortable_2="true",
-                             bSortable_3="true")
-
+    reviews = request.json()
+    
     percentages = []
     if not album:
         if type(reviews["aaData"]) == list and len(reviews["aaData"]) > 0:
@@ -105,14 +109,14 @@ def mareviews(inp, conn=None, bot=None,nick=None, chan=None):
         else:
             return u'Could not calculate average review for {} or too many bands with the same name. Use "," to seperate artist, album.'.format(band)
     else:
-        if type(reviews["aaData"]) == list  and len(reviews["aaData"]) > 0:
+        if type(reviews["aaData"]) == list and len(reviews["aaData"]) > 0:
             fullAlbum = ""
-            if reviews["aaData"] == list:
+            if type(reviews["aaData"]) is list:
                 for review in reviews["aaData"]:
                     ulink = review[0]
                     alink = BeautifulSoup(ulink).findAll("a")
-                    text = alink[0].contents[0].lower()
-                    if text == album.lower() or text.find(album) != -1:
+                    mtext = alink[0].contents[0].lower()
+                    if mtext == album.lower() or mtext.find(album) != -1:
                         percentages.append(int(review[1].replace("%", "")))
                         fullAlbum = alink[0].contents[0]
 
