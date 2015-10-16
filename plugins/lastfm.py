@@ -8,8 +8,6 @@ from sqlalchemy import Table, Column, PrimaryKeyConstraint, String
 from cloudbot import hook
 from cloudbot.util import timeformat, web, botvars
 
-import pprint
-
 api_url = "http://ws.audioscrobbler.com/2.0/?format=json"
 
 table = Table(
@@ -363,7 +361,7 @@ def topartists(text, nick, db, bot, notice):
         out = out + "{} listened to {} times. ".format(artist_name, play_count)
     return out
 
-@hook.command("ltw", "topweek", autohelp=False)
+@hook.command("ltw", "topweek", "top", autohelp=False)
 def topweek(text, nick, db, bot, notice):
     """Grabs a list of the top artists in the last week for a last.fm username. You can set your lastfm username with .l username"""
     topweek = topartists(text, nick, db, bot, notice, '7day')
@@ -380,12 +378,6 @@ def topall(text, nick, db, bot, notice):
     """Grabs a list of the top artists all time for a last.fm username. You can set your lastfm username with .l username"""
     topall = topartists(text, nick, db, bot, notice, '1year')
     return topall
-
-@hook.command("ltf", "topfortnight", autohelp=False)
-def topfortnight(text, nick, db, bot, notice):
-    """Grabs a list of the top artists in the last fortnight for a last.fm username. You can set your lastfm username with .l username"""
-    topfortnight = topartists(text, nick, db, bot, notice, '14day')
-    return topfortnight
 
 def topartists(text, nick, db, bot, notice, period):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
