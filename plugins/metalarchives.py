@@ -98,10 +98,12 @@ def mareviews(text, conn=None, bot=None,nick=None, chan=None):
     reviews = request.json()
     
     percentages = []
+    reviewCount = 0
     if not album:
         if type(reviews["aaData"]) == list and len(reviews["aaData"]) > 0:
             for review in reviews["aaData"]:
                 percentages.append(int(review[1].replace("%", "")))
+                reviewCount += 1
 
             average = reduce(lambda x, y: x + y, percentages) / len(percentages)
 
@@ -116,6 +118,7 @@ def mareviews(text, conn=None, bot=None,nick=None, chan=None):
                     ulink = review[0]
                     alink = BeautifulSoup(ulink).findAll("a")
                     mtext = alink[0].contents[0].lower()
+                    reviewCount += 1
                     if mtext == album.lower() or mtext.find(album) != -1:
                         percentages.append(int(review[1].replace("%", "")))
                         fullAlbum = alink[0].contents[0]
@@ -123,7 +126,7 @@ def mareviews(text, conn=None, bot=None,nick=None, chan=None):
                 if len(percentages) > 0:
                     average = reduce(lambda x, y: x + y, percentages) / len(percentages)
 
-                    return u'The album \x02{}\x0f by \x02{}\x0f has an average review of \x02{}\x0f%'.format(fullAlbum, band, average)
+                    return u'The album \x02{}\x0f by \x02{}\x0f has an average review of \x02{}\x0f% out of \x02{}\x0f reviews'.format(fullAlbum, band, int(round(average)), reviewCount)
                 else:
                     return u'Could not find the album {} for the band {}'.format(album, band)
             else:
