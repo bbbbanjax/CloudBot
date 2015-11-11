@@ -57,20 +57,15 @@ def gse(text):
 @hook.command('gis','image', 'googleimage')
 def gse_gis(text):
     """<query> -- Returns first Google Images result for <query>."""
-    if not dev_key:
-        return "This command requires a Google Developers Console API key."
-    if not cx:
-        return "This command requires a custom Google Search Engine ID."
 
-    parsed = requests.get(API_CS, params={"cx": cx, "q": text, "searchType": "image", "key": dev_key}).json()
+    searchUrl = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + text + "&start=0"
 
-    try:
-        result = parsed['items'][0]
-        metadata = parsed['items'][0]['image']
-    except KeyError:
-        return "No results found."
+    request = requests.get(searchUrl)
 
-    dimens = '{}x{}px'.format(metadata['width'], metadata['height'])
-    size = filesize.size(int(metadata['byteSize']))
+    data = request.json()
 
-    return u'{} [{}, {}, {}]'.format(result['link'], dimens, result['mime'], size)
+    if not data["responseData"]["results"]:
+        return "No results"
+    else:
+        iUrl = data["responseData"]["results"][0]["url"]
+        return iUrl
