@@ -201,7 +201,7 @@ def getuserartistplaycount(text, nick, bot, notice):
 def displaybandinfo(text, nick, bot, notice):
     """[artist] - displays information about [artist]."""
     if not text:
-        notice(getbandinfo.__doc__)
+        return "error"
     artist = getartistinfo(text, bot)
 
     if 'error' in artist:
@@ -429,16 +429,33 @@ def geogigs(text, conn=None, bot=None,nick=None, chan=None):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
     if not api_key:
         return "error: no api key set"
-    
+
     params = {"method": "geo.getEvents", "api_key": api_key, "location": text, "tag": style, "limit": 20}
     request = requests.get(api_url, params)
     response = request.json()
-    
+
     if "error" in response:
         return "Error: {}.".format(response["message"])
-    
-    if type(response) == dict and "event" in response["events"] and type(reponse["events"]["event"]) == list:
+
+    if type(response) == dict and "event" in response["events"] and type(response["events"]["event"]) == list:
         conn.send("PRIVMSG {}:\x01ACTION will headbang at these gigs with{}:\x01".format(chan, nick))
-        
+
     else:
-        conn.send(u"PRIVMSG {}: {}, No gigs for {} :(".format(chan, nick, inp))
+        conn.send(u"PRIVMSG {}: {}, No gigs for {} :(".format(chan, nick, text))
+
+@hook.command(autohelp=False)
+def genre(text, nick, db, bot, notice):
+    api_key = bot.config.get("api_keys", {}).get("lastfm")
+    if not api_key:
+        return "error: no api key set"
+
+    params = {"method": "tag.getInfo", "api_key": api_key, "tag": text}
+    request = requests.get(api_url, params)
+    response = request.json()
+
+    if "error" in response:
+        return "Error: {}.".format(response["message"])
+
+    summary = response["tag"]["wiki"]["summary"]
+
+    return summary
