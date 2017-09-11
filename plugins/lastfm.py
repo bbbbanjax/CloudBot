@@ -227,7 +227,7 @@ def getartistinfo(artist, bot, user = ''):
     artist = request.json()
     return artist
 
-@hook.command("lastfmcompare", "compare", "lc")
+@hook.command("lastfmcompare", "lc")
 def lastfmcompare(text, nick, bot, db):
     """[user] ([user] optional) - displays the now playing (or last played) track of LastFM user [user]"""
     api_key = bot.config.get("api_keys", {}).get("lastfm")
@@ -459,3 +459,73 @@ def genre(text, nick, db, bot, notice):
     summary = response["tag"]["wiki"]["summary"]
 
     return summary
+
+@hook.command(autohelp=False)
+def compare(text, nick, db, bot, notice):
+    api_key = bot.config.get("api_keys", {}).get("lastfm")
+
+    if not api_key:
+        return "error: no api key set"
+
+    username = get_account(nick)
+
+    if not username:
+        return("No last.fm username specified and no last.fm username is set in the database.")
+
+    params = {
+        'api_key': api_key,
+        'method': 'user.gettopartists',
+        'user': username,
+        'limit': 30
+    }
+
+    request = requests.get(api_url, params=params)
+
+    if request.status_code != requests.codes.ok:
+        return "Failed to fetch info fuck({})".format(request.status_code)
+
+    data = request.json()
+
+    if 'error' in data:
+        return "Error: {}.".format(data["message"])
+
+    range_count = len(data["topartists"]["artist"])
+
+    userArtists = []
+
+    for r in range(range_count):
+        artist_name = data["topartists"]["artist"][r]["name"]
+        userArtists.append(artist_name)
+
+    username = get_account(text)
+
+    params = {
+        'api_key': api_key,
+        'method': 'user.gettopartists',
+        'user': username,
+        'limit': 30
+    }
+
+    request = requests.get(api_url, params=params)
+
+    if request.status_code != requests.codes.ok:
+        return "Failed to fetch info fuck({})".format(request.status_code)
+
+    data = request.json()
+
+    if 'error' in data:
+        return "Error: {}.".format(data["message"])
+
+    range_count = len(data["topartists"]["artist"])
+
+    nickArtists = []
+
+    for r in range(range_count):
+        artist_name = data["topartists"]["artist"][r]["name"]
+        nickArtists.append(artist_name)
+
+    common = set(userArtists) & set(nickArtists)
+
+    percentage = len(common) / 30
+
+    return "{} and {} have {}% artists in common.".format(nick, text, percentage * 100)
