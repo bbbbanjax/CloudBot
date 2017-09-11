@@ -64,3 +64,4 @@ config.json
 *.sw0
 /.vs/CloudBot/v15
 /CloudBot.pyproj
+/CloudBot.sln

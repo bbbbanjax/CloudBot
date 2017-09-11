@@ -463,7 +463,6 @@ def genre(text, nick, db, bot, notice):
 @hook.command(autohelp=False)
 def compare(text, nick, db, bot, notice):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
-
     if not api_key:
         return "error: no api key set"
 
@@ -498,6 +497,8 @@ def compare(text, nick, db, bot, notice):
         userArtists.append(artist_name)
 
     username = get_account(text)
+    if not username:
+        username = text
 
     params = {
         'api_key': api_key,
@@ -528,4 +529,4 @@ def compare(text, nick, db, bot, notice):
 
     percentage = len(common) / 30
 
-    return "{} and {} have {}% artists in common.".format(nick, text, percentage * 100)
+    return "{} and {} have {}% artists in common.".format(nick, text, int(round(percentage * 100)))
