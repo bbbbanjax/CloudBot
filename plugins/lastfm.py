@@ -460,6 +460,12 @@ def genre(text, nick, db, bot, notice):
 
     return summary
 
+@hook.command("lty", "topyear", autohelp=False)
+def topyear(text, nick, db, bot, notice):
+    """Grabs a list of the top artists of last year for a last.fm username. You can set your lastfm username with .l username"""
+    topyear = topartists(text, nick, db, bot, notice, '12month')
+    return topyear
+
 @hook.command(autohelp=False)
 def compare(text, nick, db, bot, notice):
     api_key = bot.config.get("api_keys", {}).get("lastfm")
@@ -475,7 +481,8 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'limit': 30
+        'period': '1month',
+        'limit': 10
     }
 
     request = requests.get(api_url, params=params)
@@ -504,7 +511,8 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'limit': 30
+        'period': '1month',
+        'limit': 10
     }
 
     request = requests.get(api_url, params=params)
@@ -527,6 +535,30 @@ def compare(text, nick, db, bot, notice):
 
     common = set(userArtists) & set(nickArtists)
 
-    percentage = len(common) / 30
+    more = 0;
 
-    return "{} and {} have {}% artists in common.".format(nick, text, int(round(percentage * 100)))
+    if len(userArtists) > len(nickArtists):
+       more = len(userArtists)
+    else:
+        more = len(nickArtists)
+
+    percentage = len(common) / more
+
+    commonArtists = " ".join(common)
+
+    output = "{} and {} have {}% artists in common in the last month.".format(nick, text, int(round(percentage * 100)))
+
+    commonList = list(common)
+
+    if commonList:
+        output += " Artists: {}".format(commonList[0])
+        if(len(commonList) > 5):
+            for i in range(1, 5):
+                output += ", {}".format(commonList[i])
+        else:
+            for i in range(1, len(commonList)):
+                output += ", {}".format(commonList[i])
+
+        return output
+
+    return output

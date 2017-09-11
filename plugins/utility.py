@@ -277,7 +277,7 @@ def wrainbow(text):
 def usa(text):
     """<text> -- Makes <text> more patriotic."""
     text = strip(text)
-    c = [COLORS['red'], '\x0300', COLORS['blue']]
+    c = [COLORS['red'] + ",01", '\x0300,01', COLORS['blue'] + ",01"]
     l = len(c)
     out = ''
     for i, t in enumerate(text):
