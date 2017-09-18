@@ -481,8 +481,7 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'period': '1month',
-        'limit': 10
+        'limit': 50
     }
 
     request = requests.get(api_url, params=params)
@@ -511,8 +510,7 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'period': '1month',
-        'limit': 10
+        'limit': 50
     }
 
     request = requests.get(api_url, params=params)
@@ -546,7 +544,7 @@ def compare(text, nick, db, bot, notice):
 
     commonArtists = " ".join(common)
 
-    output = "{} and {} have {}% artists in common in the last month.".format(nick, text, int(round(percentage * 100)))
+    output = "{} and {} have {}% artists in common.".format(nick, text, int(round(percentage * 100)))
 
     commonList = list(common)
 
