@@ -481,7 +481,8 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'limit': 50
+        'limit': 50,
+        'period': '12month'
     }
 
     request = requests.get(api_url, params=params)
@@ -510,7 +511,8 @@ def compare(text, nick, db, bot, notice):
         'api_key': api_key,
         'method': 'user.gettopartists',
         'user': username,
-        'limit': 50
+        'limit': 50,
+        'period': '12month'
     }
 
     request = requests.get(api_url, params=params)
